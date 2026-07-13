@@ -1,0 +1,90 @@
+<template>
+    <div class="slds-box slds-theme_default slds-m-around_medium">
+        <h2 class="slds-text-heading_medium slds-m-bottom_medium">Partner Application Form</h2>
+
+        <template if:true={isLoading}>
+            <lightning-spinner alternative-text="Submitting..." size="medium"></lightning-spinner>
+        </template>
+
+        <template if:false={submitted}>
+            <lightning-input
+                label="Company Name"
+                data-field="companyName"
+                value={companyName}
+                onchange={handleChange}
+                required>
+            </lightning-input>
+
+            <lightning-input
+                label="Federal Tax ID"
+                data-field="federalTaxId"
+                value={federalTaxId}
+                onchange={handleChange}
+                required>
+            </lightning-input>
+
+            <lightning-input
+                label="Contact First Name"
+                data-field="firstName"
+                value={firstName}
+                onchange={handleChange}
+                required>
+            </lightning-input>
+
+            <lightning-input
+                label="Contact Last Name"
+                data-field="lastName"
+                value={lastName}
+                onchange={handleChange}
+                required>
+            </lightning-input>
+
+            <lightning-input
+                type="email"
+                label="Email"
+                data-field="email"
+                value={email}
+                onchange={handleChange}
+                required>
+            </lightning-input>
+
+            <lightning-input
+                type="tel"
+                label="Phone"
+                data-field="phone"
+                value={phone}
+                onchange={handleChange}
+                required>
+            </lightning-input>
+
+            <lightning-input
+                type="number"
+                label="Annual Revenue (optional)"
+                data-field="annualRevenue"
+                value={annualRevenue}
+                onchange={handleChange}>
+            </lightning-input>
+
+            <div class="slds-m-top_medium">
+                <lightning-button
+                    variant="brand"
+                    label="Submit Application"
+                    onclick={handleSubmit}
+                    disabled={isLoading}>
+                </lightning-button>
+            </div>
+        </template>
+
+        <template if:true={showSuccess}>
+            <div class="slds-notify slds-notify_alert slds-theme_success slds-m-top_medium" role="alert">
+                <span>{successMessage}</span>
+            </div>
+        </template>
+
+        <template if:true={showError}>
+            <div class="slds-notify slds-notify_alert slds-theme_error slds-m-top_medium" role="alert">
+                <span>{errorMessage}</span>
+            </div>
+        </template>
+    </div>
+</template>
