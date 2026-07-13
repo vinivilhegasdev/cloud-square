@@ -7,5 +7,18 @@
         <members>Opportunity.Application_Source__c</members>
         <name>CustomField</name>
     </types>
-    <version>66.0</version>
+    <types>
+        <members>ApplicationDTO</members>
+        <members>ApplicationResult</members>
+        <members>ContactDTO</members>
+        <members>WebhookRequest</members>
+        <members>ApplicationProcessingService</members>
+        <members>ApplicationFormController</members>
+        <members>ApplicationWebhook</members>
+        <members>ApplicationProcessingServiceTest</members>
+        <members>ApplicationConstants</members>
+        <members>WebhookResponse</members>
+        <name>ApexClass</name>
+    </types>
+    <version>67.0</version>
 </Package>
