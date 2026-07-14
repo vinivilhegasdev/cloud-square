@@ -1,4 +1,4 @@
-# Cloudsquare – Partner Application Case Study
+# Cloudsquare Salesforce Developer Case Study
 
 ## Overview
 
@@ -100,19 +100,10 @@ channels stay in sync by construction.
 
 ---
 
-## 3. Troubleshooting Notes (from actual development)
+## 3. Assumptions
 
-Two real issues came up while building this, worth knowing if you extend the solution:
+- Annual Revenue is accepted as input but is not persisted because the provided data model does not define a target field.
 
-1. **Guest User REST class access.** A `global` method's return type must itself be
-   `global` — `WebhookResponse` had to be declared `global class`, not `public class`,
-   or the compiler rejects `ApplicationWebhook` with "Global methods do not support
-   return type of X".
+- Account matching by Name occurs only when Federal Tax ID is not provided.
 
-2. **Wrapper serialization to/from LWC.** In this org, plain public fields on
-   `ApplicationDTO`/`ApplicationResult` (e.g. `@AuraEnabled public String companyName;`)
-   were *not* reliably serialized between the LWC and Apex — inbound data arrived as
-   `null` on the Apex side, and outbound fields like `recordType` came back `undefined`
-   in the browser. Switching every `@AuraEnabled` field to an explicit property
-   (`@AuraEnabled public String companyName { get; set; }`) resolved it. If you add new
-   fields to either wrapper, use the same pattern.
+- Duplicate Leads are not prevented because duplicate management was not part of the requirements.
