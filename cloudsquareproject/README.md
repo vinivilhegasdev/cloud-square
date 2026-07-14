@@ -1,58 +1,183 @@
-# Salesforce DX Project
+# Cloudsquare – Partner Application Case Study
 
-Salesforce DX is a development approach that brings source-driven development, team collaboration, and continuous integration to the Salesforce Platform. Instead of working directly in an org through a web browser, you work with metadata as source files in a local DX project, track changes in version control, and deploy through automated processes.
+## Overview
 
-This project template gets you started with the tools and structure you need to build Salesforce applications using source control, scratch orgs, and the Salesforce CLI.
+This solution accepts partner applications through two channels — a public Experience
+Cloud form and a public REST webhook — both routed through the **same Apex service**
+(`ApplicationProcessingService`), so business logic never lives in two places.
 
-## Prerequisites
+- If a matching `Account` is found (by Federal Tax ID, or by Name if the Tax ID is
+  blank), an **Opportunity** is created.
+- If no match is found, a **Lead** is created.
 
-Before you start, make sure you have:
+---
 
-- **Salesforce CLI** - Download from [developer.salesforce.com/tools/salesforcecli](https://developer.salesforce.com/tools/salesforcecli). See [Install Salesforce CLI](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_install_cli.htm) for details.
-- **VS Code with Salesforce Extension Pack** - See [Installation Instructions](https://developer.salesforce.com/docs/platform/sfvscode-extensions/guide/install.html) for details. Includes the Agentforce Vibes extension.
-- **A development org** - Sign up for a free Developer Edition org [here](https://developer.salesforce.com/signup).
-- **Dev Hub enabled** (optional, required to create scratch orgs) - You can enable Dev Hub in your development org under Setup > Dev Hub.  See [Provide Developers Access to Salesforce DX Tools](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_setup_dx_tools.htm).
+## 1. Setup Instructions
 
-## Project Structure
+### 1.1 Deploy the metadata
 
-Your DX project follows this structure:
+```bash
+sf project deploy start -d force-app/main/default -o <your-org>
+```
 
-- **`force-app/main/default/`** - Your metadata source files live in this default package directory. You can configure additional package directories in the `sfdx-project.json` file.
-- **`config/`** - Scratch org definitions and project settings
-- **`scripts/`** - Automation scripts for common tasks
-- **`sfdx-project.json`** - Project manifest that defines package directories, namespace, API version, and other project-level settings
+Retrieve reference (if you need to pull this org's config again later):
 
-See [Salesforce DX Project Configuration](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_ws_config.htm).
+```bash
+sf project retrieve start -x package.xml -o <your-org> -d retrieved-metadata
+```
 
-## Get Started
+`package.xml` used for this project:
 
-Ready to start developing? The [Get Started with Salesforce DX](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_get_started_dx.htm) guide walks you through your first project, from creating a scratch org to creating a simple Apex class or LWC to deploying your code to a sandbox.
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <types><members>*</members><name>ApexClass</name></types>
+    <types><members>*</members><name>LightningComponentBundle</name></types>
+    <types>
+        <members>Account.Federal_Tax_Id__c</members>
+        <members>Lead.Federal_Tax_Id__c</members>
+        <members>Lead.Application_Source__c</members>
+        <members>Opportunity.Application_Source__c</members>
+        <name>CustomField</name>
+    </types>
+    <types><members>*</members><name>Network</name></types>
+    <types><members>*</members><name>Profile</name></types>
+    <version>60.0</version>
+</Package>
+```
+> Note: the Experience Cloud site itself is captured under `Network`. Site *pages/builder*
+> content (`DigitalExperienceBundle`) doesn't reliably retrieve with a wildcard `*` — if
+> you need it, get the exact name first with
+> `sf org list metadata --metadata-type DigitalExperienceBundle -o <org>` and reference it
+> by name.
 
-## Common Salesforce CLI Commands
+### 1.2 Run the tests
 
-Here are common CLI commands that you'll use the most:
+```bash
+sf apex run test --class-names ApplicationProcessingServiceTest --result-format human -o <your-org> --code-coverage
+```
 
-- `sf org login web`: Authorize an org
-- `sf org open`: Open your org in a browser
-- `sf org create scratch`: Create a scratch org
-- `sf project deploy start`: Deploy metadata to your org
-- `sf project retrieve start`: Retrieve metadata from your org
-- `sf template generate <artifact>`: Scaffold new components, such as Apex classes and triggers, LWC components, Lightning apps, and more
-- `sf apex <command>`: Run Apex tests, run anonymous Apex blocks, and view logs
-- `sf data <command>`: Work with test data
-- `sf alias <command>`: Manage org aliases
-- `sf config <command>`: Configure CLI settings
+### 1.3 Custom fields (create if not already present)
 
-## Use Agentforce Vibes to Build Lightning Apps
+| Object | Field | Type |
+|---|---|---|
+| Account | `Federal_Tax_Id__c` | Text(40) |
+| Lead | `Federal_Tax_Id__c` | Text(40) |
+| Lead | `Application_Source__c` | Picklist (Community, Webhook) |
+| Opportunity | `Application_Source__c` | Picklist (Community, Webhook) |
 
-Transform your ideas into custom Lightning apps that extend CRM workflows directly in Lightning Experience. Through natural conversations with Agentforce Vibes, implement custom objects and fields, complex business logic, and dynamic UI components. See [Build a Lightning App Using Agentforce Vibes](https://developer.salesforce.com/docs/platform/einstein-for-devs/guide/lexapp-overview.html).
+### 1.4 Experience Cloud site (Guest User)
 
-## Additional Resources
+1. **Setup → Digital Experiences → New Site** → template **"Build Your Own (LWR)"**.
+2. In **Experience Builder**, drag the `applicationForm` LWC onto a public page and
+   **Publish**.
+3. In the site's **Guest User Profile**:
+   - **Apex Class Access**: `ApplicationFormController`, `ApplicationWebhook`.
+     (Only classes invoked *directly* from outside Apex — the browser or an external
+     system — need to be listed. `ApplicationProcessingService` and the DTO/wrapper
+     classes are called internally, from one Apex class to another, so they don't need
+     to be listed separately.)
+   - **Object Permissions**: Create on `Lead` and `Opportunity`; Read on `Account`.
+   - **Field-Level Security**: Visible on all fields the form/webhook read or write
+     (including `Federal_Tax_Id__c` and `Application_Source__c`).
+4. Enable **guest user access to Apex REST** in the site's Security settings so
+   `/services/apexrest/external/applications` is reachable without authentication.
 
-- [Agentforce Vibes Developer Guide](https://developer.salesforce.com/docs/platform/einstein-for-devs/guide/einstein-overview.html)
-- [Salesforce CLI Installation Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_intro.htm)
-- [Salesforce DX Developer Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/)
-- [Salesforce CLI Command Reference](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/)
-- [Salesforce CLI Plugin Development Guide](https://developer.salesforce.com/docs/platform/salesforce-cli-plugin/guide/conceptual-overview.html)
-- [Salesforce VS Code Extensions Documentation](https://developer.salesforce.com/tools/vscode/)
+### 1.5 Webhook URL
 
+```
+https://<your-site-domain>.my.site.com/services/apexrest/external/applications
+```
+
+Test with:
+```bash
+curl -X POST https://<your-site-domain>.my.site.com/services/apexrest/external/applications \
+  -H "Content-Type: application/json" \
+  -d '{
+    "companyName": "Acme Corp",
+    "federalTaxId": "BG123456789",
+    "contact": {
+      "firstName": "Ivan", "lastName": "Ivanov",
+      "email": "ivan@example.com", "phone": "+359888123456"
+    },
+    "annualRevenue": 500000
+  }'
+```
+
+---
+
+## 2. How the Community Form and Webhook Work
+
+Both entry points are thin adapters over one shared service:
+
+```
+Guest User (browser)  →  applicationForm (LWC)
+                              │
+                              ▼
+                  ApplicationFormController.submitApplication()
+                        (sets Application_Source__c = "Community")
+                              │
+                              ▼
+              ApplicationProcessingService.processApplication()  ◄──┐
+                              ▲                                     │
+                              │                                     │
+                  ApplicationWebhook.handlePost()                  │
+                        (sets Application_Source__c = "Webhook")   │
+                              │                                     │
+External system  →  POST /services/apexrest/external/applications ┘
+```
+
+`ApplicationProcessingService.processApplication(ApplicationDTO app)` is the single
+source of truth for the matching + record-creation logic:
+
+1. Look up `Account` by `Federal_Tax_Id__c`; if blank or no match, fall back to an exact
+   `Name` match.
+2. Match found → create `Opportunity` (`Prospecting`, `CloseDate` = today + 30 days,
+   linked to the matched Account).
+3. No match → create `Lead` (`Company`, `Federal_Tax_Id__c`, contact fields).
+4. Return `{ success, recordType, recordId, message }` regardless of the caller.
+
+Neither the LWC nor the webhook contain any of this logic themselves — they only map
+their own input shape into `ApplicationDTO` and pass it along, which is what lets both
+channels stay in sync by construction.
+
+---
+
+## 3. Assumptions Made
+
+- No specific Record Type is required for Lead/Opportunity — the org default is used.
+- `Lead.LastName` is required by the standard object; if it arrives blank it's stored as
+  `"Unknown"` rather than failing the insert. Real-world behavior would depend on
+  business rules not specified in the case.
+- No Lead deduplication logic was implemented — not requested in scope.
+- `AnnualRevenue` is accepted as input but not persisted anywhere, since neither Lead nor
+  Opportunity fields for it were part of the stated Data Model.
+- No async/Queueable processing — the expected volume for a form/webhook doesn't
+  justify that overhead for this exercise.
+- The webhook's error response always includes all four `WebhookResponse` fields
+  (`success`, `recordType`, `recordId`, `message`) rather than only `success`/`message` as
+  shown in the spec's error example, since reusing one consistent shape for both success
+  and failure responses is simpler for consumers than two different JSON shapes.
+- `without sharing` is used on `ApplicationFormController`, `ApplicationWebhook`, and
+  `ApplicationProcessingService` because the Guest User owns no records — visibility is
+  governed by the Guest User Profile's object/field permissions, not by sharing rules,
+  which `without sharing` doesn't bypass.
+
+---
+
+## 4. Troubleshooting Notes (from actual development)
+
+Two real issues came up while building this, worth knowing if you extend the solution:
+
+1. **Guest User REST class access.** A `global` method's return type must itself be
+   `global` — `WebhookResponse` had to be declared `global class`, not `public class`,
+   or the compiler rejects `ApplicationWebhook` with "Global methods do not support
+   return type of X".
+
+2. **Wrapper serialization to/from LWC.** In this org, plain public fields on
+   `ApplicationDTO`/`ApplicationResult` (e.g. `@AuraEnabled public String companyName;`)
+   were *not* reliably serialized between the LWC and Apex — inbound data arrived as
+   `null` on the Apex side, and outbound fields like `recordType` came back `undefined`
+   in the browser. Switching every `@AuraEnabled` field to an explicit property
+   (`@AuraEnabled public String companyName { get; set; }`) resolved it. If you add new
+   fields to either wrapper, use the same pattern.
