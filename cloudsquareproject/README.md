@@ -19,7 +19,7 @@ Cloud form and a public REST webhook — both routed through the **same Apex ser
 Clone this repository:
 
 ```bash
-git clone https://github.com/<seu-usuario>/<nome-do-repo>.git](https://github.com/vinivilhegasdev/cloud-square.git
+git clone https://github.com/vinivilhegasdev/cloud-square.git
 ```
 ### 1.2 Deploy the metadata
 
