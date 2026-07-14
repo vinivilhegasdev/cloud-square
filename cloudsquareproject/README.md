@@ -67,16 +67,7 @@ sf project retrieve start -x package.xml -o <your-org> -d retrieved-metadata
 </Package>
 ```
 
-### 1.2 Custom fields (create if not already present)
-
-| Object | Field | Type |
-|---|---|---|
-| Account | `Federal_Tax_Id__c` | Text(40) |
-| Lead | `Federal_Tax_Id__c` | Text(40) |
-| Lead | `Application_Source__c` | Picklist (Community, Webhook) |
-| Opportunity | `Application_Source__c` | Picklist (Community, Webhook) |
-
-### 1.3 Experience Cloud site (Guest User)
+### 1.2 Experience Cloud site (Guest User)
 
 1. **Setup → Digital Experiences → New Site** → template **"Build Your Own (LWR)"**.
 2. In **Experience Builder**, drag the `applicationForm` LWC onto a public page and
@@ -93,7 +84,7 @@ sf project retrieve start -x package.xml -o <your-org> -d retrieved-metadata
 4. Enable **guest user access to Apex REST** in the site's Security settings so
    `/services/apexrest/external/applications` is reachable without authentication.
 
-### 1.4 Webhook URL
+### 1.3 Webhook URL
 
 ```
 https://<your-site-domain>.my.site.com/services/apexrest/external/applications
