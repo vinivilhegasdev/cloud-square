@@ -63,16 +63,12 @@ sf project deploy start -d force-app/main/default -o <your-org>
 
 ### 1.2 Experience Cloud site (Guest User)
 
-1. **Setup → Digital Experiences → New Site** → template **"Build Your Own (LWR)"**.
+1. **Setup → Digital Experiences → Enable → New Site** → template **"Build Your Own (LWR)"**.
 2. In **Experience Builder**, drag the `applicationForm` LWC onto a public page and
    **Publish**.
 3. In the site's **Guest User Profile**:
-   - **Apex Class Access**: `ApplicationFormController`, `ApplicationWebhook`.
-     (Only classes invoked *directly* from outside Apex — the browser or an external
-     system — need to be listed. `ApplicationProcessingService` and the DTO/wrapper
-     classes are called internally, from one Apex class to another, so they don't need
-     to be listed separately.)
-   - **Object Permissions**: Create on `Lead` and `Opportunity`; Read on `Account`.
+   - **Apex Class Access**: `ApplicationFormController`, `ApplicationWebhook`.     
+   - **Object Permissions**: Read and Create on `Lead` and `Opportunity`; Read on `Account`.
    - **Field-Level Security**: Visible on all fields the form/webhook read or write
      (including `Federal_Tax_Id__c` and `Application_Source__c`).
 4. Enable **guest user access to Apex REST** in the site's Security settings so
