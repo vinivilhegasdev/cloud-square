@@ -4,7 +4,7 @@
 
 This solution accepts partner applications through two channels — a public Experience
 Cloud form and a public REST webhook — both routed through the **same Apex service**
-(`ApplicationProcessingService`), so business logic never lives in two places.
+(`ApplicationProcessingService`).
 
 - If a matching `Account` is found (by Federal Tax ID, or by Name if the Tax ID is
   blank), an **Opportunity** is created.
@@ -31,8 +31,6 @@ sf project retrieve start -x package.xml -o <your-org> -d retrieved-metadata
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
-    <types><members>*</members><name>ApexClass</name></types>
-    <types><members>*</members><name>LightningComponentBundle</name></types>
     <types>
         <members>Account.Federal_Tax_Id__c</members>
         <members>Lead.Federal_Tax_Id__c</members>
@@ -40,24 +38,44 @@ sf project retrieve start -x package.xml -o <your-org> -d retrieved-metadata
         <members>Opportunity.Application_Source__c</members>
         <name>CustomField</name>
     </types>
-    <types><members>*</members><name>Network</name></types>
-    <types><members>*</members><name>Profile</name></types>
-    <version>60.0</version>
+    <types>
+        <members>ApplicationDTO</members>
+        <members>ApplicationResult</members>
+        <members>ContactDTO</members>
+        <members>WebhookRequest</members>
+        <members>ApplicationProcessingService</members>
+        <members>ApplicationFormController</members>
+        <members>ApplicationWebhook</members>
+        <members>ApplicationProcessingServiceTest</members>
+        <members>ApplicationConstants</members>
+        <members>WebhookResponse</members>
+        <name>ApexClass</name>
+    </types>
+    <types>
+        <members>applicationForm</members>
+        <name>LightningComponentBundle</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>Network</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>DigitalExperienceBundle</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>DigitalExperienceConfig</name>
+    </types>
+    <types>
+        <members>Partner Applications Profile</members>
+        <name>Profile</name>
+    </types>    
+    <version>67.0</version>
 </Package>
 ```
-> Note: the Experience Cloud site itself is captured under `Network`. Site *pages/builder*
-> content (`DigitalExperienceBundle`) doesn't reliably retrieve with a wildcard `*` — if
-> you need it, get the exact name first with
-> `sf org list metadata --metadata-type DigitalExperienceBundle -o <org>` and reference it
-> by name.
 
-### 1.2 Run the tests
-
-```bash
-sf apex run test --class-names ApplicationProcessingServiceTest --result-format human -o <your-org> --code-coverage
-```
-
-### 1.3 Custom fields (create if not already present)
+### 1.2 Custom fields (create if not already present)
 
 | Object | Field | Type |
 |---|---|---|
@@ -66,7 +84,7 @@ sf apex run test --class-names ApplicationProcessingServiceTest --result-format 
 | Lead | `Application_Source__c` | Picklist (Community, Webhook) |
 | Opportunity | `Application_Source__c` | Picklist (Community, Webhook) |
 
-### 1.4 Experience Cloud site (Guest User)
+### 1.3 Experience Cloud site (Guest User)
 
 1. **Setup → Digital Experiences → New Site** → template **"Build Your Own (LWR)"**.
 2. In **Experience Builder**, drag the `applicationForm` LWC onto a public page and
@@ -83,7 +101,7 @@ sf apex run test --class-names ApplicationProcessingServiceTest --result-format 
 4. Enable **guest user access to Apex REST** in the site's Security settings so
    `/services/apexrest/external/applications` is reachable without authentication.
 
-### 1.5 Webhook URL
+### 1.4 Webhook URL
 
 ```
 https://<your-site-domain>.my.site.com/services/apexrest/external/applications
@@ -143,29 +161,7 @@ channels stay in sync by construction.
 
 ---
 
-## 3. Assumptions Made
-
-- No specific Record Type is required for Lead/Opportunity — the org default is used.
-- `Lead.LastName` is required by the standard object; if it arrives blank it's stored as
-  `"Unknown"` rather than failing the insert. Real-world behavior would depend on
-  business rules not specified in the case.
-- No Lead deduplication logic was implemented — not requested in scope.
-- `AnnualRevenue` is accepted as input but not persisted anywhere, since neither Lead nor
-  Opportunity fields for it were part of the stated Data Model.
-- No async/Queueable processing — the expected volume for a form/webhook doesn't
-  justify that overhead for this exercise.
-- The webhook's error response always includes all four `WebhookResponse` fields
-  (`success`, `recordType`, `recordId`, `message`) rather than only `success`/`message` as
-  shown in the spec's error example, since reusing one consistent shape for both success
-  and failure responses is simpler for consumers than two different JSON shapes.
-- `without sharing` is used on `ApplicationFormController`, `ApplicationWebhook`, and
-  `ApplicationProcessingService` because the Guest User owns no records — visibility is
-  governed by the Guest User Profile's object/field permissions, not by sharing rules,
-  which `without sharing` doesn't bypass.
-
----
-
-## 4. Troubleshooting Notes (from actual development)
+## 3. Troubleshooting Notes (from actual development)
 
 Two real issues came up while building this, worth knowing if you extend the solution:
 
