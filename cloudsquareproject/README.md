@@ -20,12 +20,6 @@ Cloud form and a public REST webhook — both routed through the **same Apex ser
 sf project deploy start -d force-app/main/default -o <your-org>
 ```
 
-Retrieve reference (if you need to pull this org's config again later):
-
-```bash
-sf project retrieve start -x package.xml -o <your-org> -d retrieved-metadata
-```
-
 `package.xml` used for this project:
 
 ```xml
