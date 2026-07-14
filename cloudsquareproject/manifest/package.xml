@@ -23,14 +23,6 @@
     <types>
         <members>applicationForm</members>
         <name>LightningComponentBundle</name>
-    </types>
-    <types>
-        <members>*</members>
-        <name>Network</name>
-    </types>    
-    <types>
-        <members>Partner Applications Profile</members>
-        <name>Profile</name>
-    </types>    
+    </types>      
     <version>67.0</version>
 </Package>
