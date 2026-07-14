@@ -1,4 +1,4 @@
-# Cloudsquare – Partner Application Case Study
+# Cloudsquare Salesforce Developer Case Study
 
 ## Overview
 
@@ -14,77 +14,33 @@ Cloud form and a public REST webhook — both routed through the **same Apex ser
 
 ## 1. Setup Instructions
 
-### 1.1 Deploy the metadata
+### 1.1 Get git repo
+
+Clone this repository:
+
+```bash
+git clone https://github.com/vinivilhegasdev/cloud-square.git
+```
+### 1.2 Deploy the metadata
 
 ```bash
 sf project deploy start -d force-app/main/default -o <your-org>
 ```
 
-Retrieve reference (if you need to pull this org's config again later):
+### 1.3 Experience Cloud site (Guest User)
 
-```bash
-sf project retrieve start -x package.xml -o <your-org> -d retrieved-metadata
-```
-
-`package.xml` used for this project:
-
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<Package xmlns="http://soap.sforce.com/2006/04/metadata">
-    <types>
-        <members>Account.Federal_Tax_Id__c</members>
-        <members>Lead.Federal_Tax_Id__c</members>
-        <members>Lead.Application_Source__c</members>
-        <members>Opportunity.Application_Source__c</members>
-        <name>CustomField</name>
-    </types>
-    <types>
-        <members>ApplicationDTO</members>
-        <members>ApplicationResult</members>
-        <members>ContactDTO</members>
-        <members>WebhookRequest</members>
-        <members>ApplicationProcessingService</members>
-        <members>ApplicationFormController</members>
-        <members>ApplicationWebhook</members>
-        <members>ApplicationProcessingServiceTest</members>
-        <members>ApplicationConstants</members>
-        <members>WebhookResponse</members>
-        <name>ApexClass</name>
-    </types>
-    <types>
-        <members>applicationForm</members>
-        <name>LightningComponentBundle</name>
-    </types>
-    <types>
-        <members>*</members>
-        <name>Network</name>
-    </types>    
-    <types>
-        <members>Partner Applications Profile</members>
-        <name>Profile</name>
-    </types>    
-    <version>67.0</version>
-</Package>
-```
-
-### 1.2 Experience Cloud site (Guest User)
-
-1. **Setup → Digital Experiences → New Site** → template **"Build Your Own (LWR)"**.
+1. **Setup → Digital Experiences → Enable → New Site** → template **"Build Your Own (LWR)"**.
 2. In **Experience Builder**, drag the `applicationForm` LWC onto a public page and
    **Publish**.
 3. In the site's **Guest User Profile**:
-   - **Apex Class Access**: `ApplicationFormController`, `ApplicationWebhook`.
-     (Only classes invoked *directly* from outside Apex — the browser or an external
-     system — need to be listed. `ApplicationProcessingService` and the DTO/wrapper
-     classes are called internally, from one Apex class to another, so they don't need
-     to be listed separately.)
-   - **Object Permissions**: Create on `Lead` and `Opportunity`; Read on `Account`.
+   - **Apex Class Access**: `ApplicationFormController`, `ApplicationWebhook`.     
+   - **Object Permissions**: Read and Create on `Lead` and `Opportunity`; Read on `Account`.
    - **Field-Level Security**: Visible on all fields the form/webhook read or write
      (including `Federal_Tax_Id__c` and `Application_Source__c`).
 4. Enable **guest user access to Apex REST** in the site's Security settings so
    `/services/apexrest/external/applications` is reachable without authentication.
 
-### 1.3 Webhook URL
+### 1.4 Webhook URL
 
 ```
 https://<your-site-domain>.my.site.com/services/apexrest/external/applications
@@ -144,19 +100,10 @@ channels stay in sync by construction.
 
 ---
 
-## 3. Troubleshooting Notes (from actual development)
+## 3. Assumptions
 
-Two real issues came up while building this, worth knowing if you extend the solution:
+- Annual Revenue is accepted as input but is not persisted because the provided data model does not define a target field.
 
-1. **Guest User REST class access.** A `global` method's return type must itself be
-   `global` — `WebhookResponse` had to be declared `global class`, not `public class`,
-   or the compiler rejects `ApplicationWebhook` with "Global methods do not support
-   return type of X".
+- Account matching by Name occurs only when Federal Tax ID is not provided.
 
-2. **Wrapper serialization to/from LWC.** In this org, plain public fields on
-   `ApplicationDTO`/`ApplicationResult` (e.g. `@AuraEnabled public String companyName;`)
-   were *not* reliably serialized between the LWC and Apex — inbound data arrived as
-   `null` on the Apex side, and outbound fields like `recordType` came back `undefined`
-   in the browser. Switching every `@AuraEnabled` field to an explicit property
-   (`@AuraEnabled public String companyName { get; set; }`) resolved it. If you add new
-   fields to either wrapper, use the same pattern.
+- Duplicate Leads are not prevented because duplicate management was not part of the requirements.
