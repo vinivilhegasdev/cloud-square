@@ -58,15 +58,7 @@ sf project retrieve start -x package.xml -o <your-org> -d retrieved-metadata
     <types>
         <members>*</members>
         <name>Network</name>
-    </types>
-    <types>
-        <members>*</members>
-        <name>DigitalExperienceBundle</name>
-    </types>
-    <types>
-        <members>*</members>
-        <name>DigitalExperienceConfig</name>
-    </types>
+    </types>    
     <types>
         <members>Partner Applications Profile</members>
         <name>Profile</name>
