@@ -38,7 +38,7 @@ public without sharing class ApplicationProcessingService {
             } else {
                 Lead lead = new Lead();
                 lead.FirstName = app.firstName;
-                lead.LastName = String.isNotBlank(app.lastName) ? app.lastName : 'Unknown';
+                lead.LastName = app.lastName;
                 System.debug('app.companyName: ' + app.companyName);
                 lead.Company = app.companyName;
                 lead.Email = app.email;
