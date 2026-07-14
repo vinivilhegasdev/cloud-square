@@ -9,6 +9,16 @@ public without sharing class ApplicationProcessingService {
             return result;
         }
 
+        System.debug('=== DTO RECEBIDO NO SERVICE ===');
+    System.debug('companyName: ' + app.companyName);
+    System.debug('federalTaxId: ' + app.federalTaxId);
+    System.debug('firstName: ' + app.firstName);
+    System.debug('lastName: ' + app.lastName);
+    System.debug('email: ' + app.email);
+    System.debug('phone: ' + app.phone);
+    System.debug('applicationSource: ' + app.applicationSource);
+    System.debug('JSON completo: ' + JSON.serialize(app));
+
         try {
             Account matchedAccount = findMatchingAccount(app);
 
@@ -29,6 +39,7 @@ public without sharing class ApplicationProcessingService {
                 Lead lead = new Lead();
                 lead.FirstName = app.firstName;
                 lead.LastName = String.isNotBlank(app.lastName) ? app.lastName : 'Unknown';
+                System.debug('app.companyName: ' + app.companyName);
                 lead.Company = app.companyName;
                 lead.Email = app.email;
                 lead.Phone = app.phone;

@@ -29,6 +29,7 @@ export default class ApplicationForm extends LightningElement {
     handleChange(event) {
         const field = event.target.dataset.field;
         this[field] = event.target.value;
+        console.log('handleChange -> field:', field, '| value:', event.target.value);
     }
 
     validateFields() {
@@ -39,6 +40,7 @@ export default class ApplicationForm extends LightningElement {
                 if (!input.checkValidity()) {
                     input.reportValidity();
                     isValid = false;
+                    console.log('Campo inválido:', input.dataset.field, '| valor atual:', input.value);
                 }
             }
         });
@@ -49,6 +51,15 @@ export default class ApplicationForm extends LightningElement {
     async handleSubmit() {
         this.showSuccess = false;
         this.showError = false;
+
+        console.log('Estado antes de validar:', JSON.stringify({
+            companyName: this.companyName,
+            federalTaxId: this.federalTaxId,
+            firstName: this.firstName,
+            lastName: this.lastName,
+            email: this.email,
+            phone: this.phone
+        }));
 
         if (!this.validateFields()) {
             return;
@@ -66,8 +77,12 @@ export default class ApplicationForm extends LightningElement {
             annualRevenue: this.annualRevenue ? Number(this.annualRevenue) : null
         };
 
+        console.log('Payload enviado pro Apex:', JSON.stringify(input));
+
         try {
             const result = await submitApplication({ input });
+
+            console.log('Resposta do Apex:', JSON.stringify(result));
 
             if (result.success) {
                 this.successMessage = `Application submitted successfully! Created a ${result.recordType} (Id: ${result.recordId}).`;
@@ -78,6 +93,7 @@ export default class ApplicationForm extends LightningElement {
                 this.showError = true;
             }
         } catch (error) {
+            console.log('Erro na chamada Apex:', JSON.stringify(error));
             this.errorMessage = (error?.body?.message) || 'Unexpected error submitting the application.';
             this.showError = true;
         } finally {

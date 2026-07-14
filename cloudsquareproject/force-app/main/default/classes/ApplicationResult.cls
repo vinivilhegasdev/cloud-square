@@ -1,15 +1,8 @@
 public class ApplicationResult {
 
-    @AuraEnabled
-    public Boolean success;
-
-    @AuraEnabled
-    public String recordType;
-
-    @AuraEnabled
-    public Id recordId;
-
-    @AuraEnabled
-    public String message;
+    @AuraEnabled public Boolean success { get; set; }
+    @AuraEnabled public String recordType { get; set; }
+    @AuraEnabled public Id recordId { get; set; }
+    @AuraEnabled public String message { get; set; }
 
 }

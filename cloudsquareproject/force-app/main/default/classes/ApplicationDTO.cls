@@ -1,27 +1,10 @@
 public class ApplicationDTO {
-
-    @AuraEnabled
-    public String companyName;
-
-    @AuraEnabled
-    public String federalTaxId;
-
-    @AuraEnabled
-    public String firstName;
-
-    @AuraEnabled
-    public String lastName;
-
-    @AuraEnabled
-    public String email;
-
-    @AuraEnabled
-    public String phone;
-
-    @AuraEnabled
-    public Decimal annualRevenue;
-
-    @AuraEnabled
-    public String applicationSource;
-
+    @AuraEnabled public String companyName { get; set; }
+    @AuraEnabled public String federalTaxId { get; set; }
+    @AuraEnabled public String firstName { get; set; }
+    @AuraEnabled public String lastName { get; set; }
+    @AuraEnabled public String email { get; set; }
+    @AuraEnabled public String phone { get; set; }
+    @AuraEnabled public Decimal annualRevenue { get; set; }
+    @AuraEnabled public String applicationSource { get; set; }
 }

@@ -20,5 +20,25 @@
         <members>WebhookResponse</members>
         <name>ApexClass</name>
     </types>
+    <types>
+        <members>*</members>
+        <name>LightningComponentBundle</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>Network</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>ExperienceBundle</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>Profile</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>SharingRules</name>
+    </types>
     <version>67.0</version>
 </Package>
