@@ -14,7 +14,14 @@ Cloud form and a public REST webhook — both routed through the **same Apex ser
 
 ## 1. Setup Instructions
 
-### 1.1 Deploy the metadata
+### 1.1 Get git repo
+
+Clone this repository:
+
+```bash
+git clone https://github.com/<seu-usuario>/<nome-do-repo>.git](https://github.com/vinivilhegasdev/cloud-square.git
+
+### 1.2 Deploy the metadata
 
 ```bash
 sf project deploy start -d force-app/main/default -o <your-org>
@@ -61,7 +68,7 @@ sf project deploy start -d force-app/main/default -o <your-org>
 </Package>
 ```
 
-### 1.2 Experience Cloud site (Guest User)
+### 1.3 Experience Cloud site (Guest User)
 
 1. **Setup → Digital Experiences → Enable → New Site** → template **"Build Your Own (LWR)"**.
 2. In **Experience Builder**, drag the `applicationForm` LWC onto a public page and
@@ -74,7 +81,7 @@ sf project deploy start -d force-app/main/default -o <your-org>
 4. Enable **guest user access to Apex REST** in the site's Security settings so
    `/services/apexrest/external/applications` is reachable without authentication.
 
-### 1.3 Webhook URL
+### 1.4 Webhook URL
 
 ```
 https://<your-site-domain>.my.site.com/services/apexrest/external/applications
