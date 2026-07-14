@@ -27,47 +27,6 @@ git clone https://github.com/vinivilhegasdev/cloud-square.git
 sf project deploy start -d force-app/main/default -o <your-org>
 ```
 
-`package.xml` used for this project:
-
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<Package xmlns="http://soap.sforce.com/2006/04/metadata">
-    <types>
-        <members>Account.Federal_Tax_Id__c</members>
-        <members>Lead.Federal_Tax_Id__c</members>
-        <members>Lead.Application_Source__c</members>
-        <members>Opportunity.Application_Source__c</members>
-        <name>CustomField</name>
-    </types>
-    <types>
-        <members>ApplicationDTO</members>
-        <members>ApplicationResult</members>
-        <members>ContactDTO</members>
-        <members>WebhookRequest</members>
-        <members>ApplicationProcessingService</members>
-        <members>ApplicationFormController</members>
-        <members>ApplicationWebhook</members>
-        <members>ApplicationProcessingServiceTest</members>
-        <members>ApplicationConstants</members>
-        <members>WebhookResponse</members>
-        <name>ApexClass</name>
-    </types>
-    <types>
-        <members>applicationForm</members>
-        <name>LightningComponentBundle</name>
-    </types>
-    <types>
-        <members>*</members>
-        <name>Network</name>
-    </types>    
-    <types>
-        <members>Partner Applications Profile</members>
-        <name>Profile</name>
-    </types>    
-    <version>67.0</version>
-</Package>
-```
-
 ### 1.3 Experience Cloud site (Guest User)
 
 1. **Setup → Digital Experiences → Enable → New Site** → template **"Build Your Own (LWR)"**.
