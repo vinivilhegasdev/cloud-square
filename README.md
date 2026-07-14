@@ -161,29 +161,7 @@ channels stay in sync by construction.
 
 ---
 
-## 3. Assumptions Made
-
-- No specific Record Type is required for Lead/Opportunity — the org default is used.
-- `Lead.LastName` is required by the standard object; if it arrives blank it's stored as
-  `"Unknown"` rather than failing the insert. Real-world behavior would depend on
-  business rules not specified in the case.
-- No Lead deduplication logic was implemented — not requested in scope.
-- `AnnualRevenue` is accepted as input but not persisted anywhere, since neither Lead nor
-  Opportunity fields for it were part of the stated Data Model.
-- No async/Queueable processing — the expected volume for a form/webhook doesn't
-  justify that overhead for this exercise.
-- The webhook's error response always includes all four `WebhookResponse` fields
-  (`success`, `recordType`, `recordId`, `message`) rather than only `success`/`message` as
-  shown in the spec's error example, since reusing one consistent shape for both success
-  and failure responses is simpler for consumers than two different JSON shapes.
-- `without sharing` is used on `ApplicationFormController`, `ApplicationWebhook`, and
-  `ApplicationProcessingService` because the Guest User owns no records — visibility is
-  governed by the Guest User Profile's object/field permissions, not by sharing rules,
-  which `without sharing` doesn't bypass.
-
----
-
-## 4. Troubleshooting Notes (from actual development)
+## 3. Troubleshooting Notes (from actual development)
 
 Two real issues came up while building this, worth knowing if you extend the solution:
 
